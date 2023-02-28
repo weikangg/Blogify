@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinLengthValidator
 # Create your models here.
+
 class Tag(models.Model):
     caption = models.CharField(max_length=20)
 
@@ -25,7 +26,17 @@ class Post(models.Model):
     date = models.DateField(auto_now=True)
     slug = models.SlugField(unique=True) # Slug field and unique == true, sets db_index is true automatically.
     content = models.TextField(validators = [MinLengthValidator(10)])
-    author = models.ForeignKey(Author, on_delete=models.SET_NULL, null = True,related_name="posts")
+    author = models.ForeignKey(Author, on_delete=models.SET_NULL, null = True,related_name="posts") # one author many posts. but 1 post made by 1 author, hence the author should be the foreign key.
     tags = models.ManyToManyField(Tag)
 
+    def __str__(self):
+        return f"{self.title} - {self.author.full_name()}"
 
+class Comment(models.Model):
+    user_name = models.CharField(max_length=120)
+    email = models.EmailField()
+    text = models.TextField(max_length=400)
+    post = models.ForeignKey(Post,on_delete=models.CASCADE, related_name="comments") # 1 post can have many comments, but each comment only belongs to one post. hence the post should be the foreign key.
+
+    def __str__(self):
+        return f"{self.text} - {self.user_name}"
