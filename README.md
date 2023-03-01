@@ -7,3 +7,5 @@ This was a practice project for me to apply the Django Framework.
 ## Tech Stack
 - Django
 - Python
+- SQLite3 for development and switched to PostgreSQL for Deployment
+- AWS Elastic BeanStalk (For Deployment)
