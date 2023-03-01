@@ -21,6 +21,10 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("blog.urls"))
-] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT) 
-    # media url which defines the url under which these files should be reachable. in this case is /files/
-    # media root for that particular folder where the files are stored. 
+] 
+
+# FOR DJANGO TO KNOW WHERE TO SERVE.
+
+# + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root = settings.STATIC_ROOT) 
+# #media url which defines the url under which these files should be reachable. in this case is /files/ # media root for that particular folder where the files are stored. 
+# Serving static files second line, create REQUIREMENTS.TXT FILE

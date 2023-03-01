@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from os import getenv
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +26,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-0(0&%p*opz3n$_efguri8zt$uyli=(1l$*f9(m@l8l)=4!7s!s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = getenv("IS_DEVELOPMENT", True)
 
-ALLOWED_HOSTS = []
+# HOSTING ADDRESS OF SERVER
+ALLOWED_HOSTS = [
+    getenv("APP_HOST"),
+    '127.0.0.1'
+]
 
 
 # Application definition
@@ -79,8 +86,12 @@ WSGI_APPLICATION = 'djangoblog.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        "USER": getenv('POSTGRE_USER'),
+        "PASSWORD":getenv('POSTGRE_PASSWORD'),
+        "HOST":"blogify.cnnabdrmuxcx.ap-southeast-1.rds.amazonaws.com",
+        "PORT":"5432"
     }
 }
 
@@ -118,6 +129,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
+
+STATIC_ROOT = BASE_DIR / "staticfiles" # FOR COLLECTION OF ALL THE STATIC FILES FOR PRODUCTION, move all the static files into 1 folder.
 
 STATIC_URL = 'static/'
 

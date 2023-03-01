@@ -43,13 +43,23 @@ def posts(request):
 # Class based view for individual post view.
 
 class SinglePostView(View):
+    def is_stored_post(self,request,post_id):
+        stored_posts = request.session.get("stored_posts")
+        if stored_posts is not None:
+            isSaved = post_id in stored_posts
+        else:
+            isSaved = False
+        return isSaved
 
     def get(self,request, slug):
         post = Post.objects.get(slug=slug) # slug will be received as part of the url.
+
         context = {
             "post": post,
             "post_tags": post.tags.all(),
-            "comment_form": CommentForm()
+            "comment_form": CommentForm(),
+            "comments": post.comments.all().order_by("-id"), # thru the related name
+            "isSaved": self.is_stored_post(request,post.id)
         }
         return render(request, "blog/post-detail.html", context)
     
@@ -65,9 +75,12 @@ class SinglePostView(View):
         context = {
             "post": post,
             "post_tags": post.tags.all(),
-            "comment_form": CommentForm()
+            "comment_form": CommentForm(),
+            "comments": post.comments.all().order_by("-id")
         }
         return render(request,"blog/post-detail.html", context)
+    
+
 
 def post_detail(request, slug):
     identified_post = get_object_or_404(Post,slug=slug)
@@ -75,3 +88,37 @@ def post_detail(request, slug):
         'post' : identified_post,
         "post_tags": identified_post.tags.all() # pass in all the tags
     })
+
+class ReadLaterView(View):
+    def get(self,request):
+        stored_posts = request.session.get("stored_posts")
+        context = {}
+        if stored_posts is None or len(stored_posts ) == 0:
+            context["posts"] = []
+            context["has_posts"] = False
+
+        else:
+            posts = Post.objects.filter(id__in=stored_posts) # Filter to check if the id is in the stored_posts list. Note the id in db is integer. session one must also be int. or convert.
+            context["posts"]  = posts
+            context["has_posts"] = True
+        return render(request,"blog/stored-posts.html",context)
+
+    def post(self,request):
+        stored_posts = request.session.get("stored_posts") # Use .get instead of ['stored_posts'] so that error won't be thrown
+
+        if stored_posts is None:
+            stored_posts = []
+        
+        post_id = int(request.POST["post_id"])
+        
+        # Check if the post is not already in the stored posts, if it's not means the user wanted to add.
+        if post_id not in stored_posts:
+            stored_posts.append(post_id) # the post id is being sent from the form in post-detail.html through the name in the hidden input.
+        
+        # else, the user clicked on the delete button.
+        else:
+            stored_posts.remove(post_id)
+            
+        request.session["stored_posts"] = stored_posts # store to session.
+        return HttpResponseRedirect("/")
+
